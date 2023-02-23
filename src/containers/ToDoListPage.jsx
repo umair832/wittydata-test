@@ -41,8 +41,9 @@ const ToDoListPage = () => {
      */
     const getTodos = async () => {
         try {
-            const response = await axios.get('http://localhost:3001/api/todos');
-            setTodos(response.data);
+            const assignData = await axios.get('http://localhost:3001/api/task/');
+
+            setTodos(assignData.data);
             setLoading(false);
         } catch (error) {
             console.error(error);
@@ -80,7 +81,7 @@ const ToDoListPage = () => {
      */
     const handleDeleteTodo = async (id) => {
         try {
-            await axios.delete(`http://localhost:3001/api/todos/${id}`);
+            await axios.delete(`http://localhost:3001/api/task/${id}`);
             message.success('Todo deleted successfully');
             getTodos();
         } catch (error) {
@@ -136,11 +137,12 @@ const ToDoListPage = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
+            console.log(values);
             if (values.id) {
-                await axios.put(`http://localhost:3001/api/todos/${values.id}`, values);
+                await axios.put(`http://localhost:3001/api/task/${values.id}`, values);
                 message.success('Todo updated successfully');
             } else {
-                await axios.post('http://localhost:3001/api/todos', values);
+                await axios.post('http://localhost:3001/api/task', values);
                 message.success('Todo created successfully');
             }
             getTodos();
@@ -156,12 +158,14 @@ const ToDoListPage = () => {
     const handleShareOk = async () => {
         try {
             const values = await form.validateFields();
+            console.log(values);
+
             if (values.id) {
-                await axios.put(`http://localhost:3001/api/todos/${values.id}`, values);
-                message.success('Todo updated successfully');
+                await axios.put(`http://localhost:3001/api/assignment/${values.id}`, values);
+                message.success('Todo sharing updated successfully');
             } else {
-                await axios.post('http://localhost:3001/api/todos', values);
-                message.success('Todo created successfully');
+                await axios.post('http://localhost:3001/api/assignment', values);
+                message.success('Todo sharing created successfully');
             }
             getTodos();
             setIsModalVisible(false);
@@ -224,7 +228,7 @@ const ToDoListPage = () => {
     const handleLogout = () => {
         localStorage.removeItem('user');
         window.location.href = '/login';
-    } 
+    }
 
     const filteredTodos = todos.filter(
         (todo) =>

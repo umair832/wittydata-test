@@ -97,40 +97,21 @@ router.post('/api/users', async (ctx) => {
   }
 });
 
-/** TODO List Data */
-//Get all todo list data
-router.get('/api/todos', async (ctx) => {
+/** TASK Data */
+//Get all task data
+router.get('/api/task', async (ctx) => {
   const client = await pool.connect();
-  const { rows } = await client.query('SELECT * FROM todolist');
+  const { rows } = await client.query('SELECT * FROM task');
   ctx.body = rows;
 });
 
-//Create new todo list data
-router.post('/api/todos', async (ctx) => {
-  const client = await pool.connect();
-  const { title, description } = ctx.request.body;
-
-  const queryText = 'INSERT INTO todolist (title, description) VALUES ($1, $2)';
-  const values = [title, description];
-
-  try{
-    await client.query(queryText, values);
-    ctx.body = { success: true };
-  }
-  catch (error){
-    console.error(error);
-    ctx.status = 500;
-    ctx.body = { success: false };
-  }
-});
-
-//Update existing todo list data
-router.put('/api/todos/:id', async (ctx) => {
+//Create new task data
+router.post('/api/task/:id', async (ctx) => {
   const client = await pool.connect();
   const { id } = ctx.params;
   const { title, description } = ctx.request.body;
 
-  const queryText = 'UPDATE todolist SET title = $1, description = $2 WHERE id = $3';
+  const queryText = 'INSERT INTO task (title, description, user_id) VALUES ($1, $2, $3)';
   const values = [title, description, id];
 
   try{
@@ -144,12 +125,32 @@ router.put('/api/todos/:id', async (ctx) => {
   }
 });
 
-//Delete existing todo list data
-router.delete('/api/todos/:id', async (ctx) => {
+//Update existing task data
+router.put('/api/task/:id', async (ctx) => {
+  const client = await pool.connect();
+  const { id } = ctx.params;
+  const { title, description } = ctx.request.body;
+
+  const queryText = 'UPDATE task SET title = $1, description = $2 WHERE id = $3';
+  const values = [title, description, id];
+
+  try{
+    await client.query(queryText, values);
+    ctx.body = { success: true };
+  }
+  catch (error){
+    console.error(error);
+    ctx.status = 500;
+    ctx.body = { success: false };
+  }
+});
+
+//Delete existing task data
+router.delete('/api/task/:id', async (ctx) => {
   const client = await pool.connect();
   const { id } = ctx.params;
 
-  const queryText = 'DELETE FROM todolist WHERE id = $1';
+  const queryText = 'DELETE FROM task WHERE id = $1';
   const values = [id];
 
   try{
@@ -161,6 +162,56 @@ router.delete('/api/todos/:id', async (ctx) => {
     ctx.status = 500;
     ctx.body = { success: false };
   }
+});
+
+
+/**ASSIGNMENT Data */
+//Create new assignment data
+router.post('/api/assignment', async (ctx) => {
+  const client = await pool.connect();
+  const { userID, taskID } = ctx.request.body;
+
+  const queryText = 'INSERT INTO assignmet (user_id, task_id) VALUES ($1, $2)';
+  const values = [userID, taskID];
+
+  try{
+    await client.query(queryText, values);
+    ctx.body = { success: true };
+  }
+  catch (error){
+    console.error(error);
+    ctx.status = 500;
+    ctx.body = { success: false };
+  }
+});
+
+//Update existing assignment data
+router.put('/api/assignment/:id', async (ctx) => {
+  const client = await pool.connect();
+  const { id } = ctx.params;
+  const { userID, taskID } = ctx.request.body;
+
+  const queryText = 'UPDATE assignment SET user_id = $1, task_id = $2 WHERE id = $3';
+  const values = [userID, taskID, id];
+
+  try{
+    await client.query(queryText, values);
+    ctx.body = { success: true };
+  }
+  catch (error){
+    console.error(error);
+    ctx.status = 500;
+    ctx.body = { success: false };
+  }
+});
+
+//Get current assignments for user
+router.get('/api/assignment/:id', async (ctx) => {
+  const client = await pool.connect();
+  const { id } = ctx.params;
+
+  const { rows } = await client.query('SELECT * FROM task JOIN assignment ON $1 = user_id', [id]);
+  ctx.body = rows;
 });
 
 
